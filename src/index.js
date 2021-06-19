@@ -32,11 +32,14 @@ const resolvers = {
       return link
     }
   },
-  Link: {
-    id: (parent) => parent.id,
-    description: (parent) => parent.description,
-    url: (parent) => parent.url
-  }
+  // The entire Link resolver can be commented out since the only implementations we're using are trivial here
+  // Link: {
+  //   // id: (parent) => parent.id,
+  //   // description: (parent) => parent.description,
+  //   // url: (parent) => parent.url
+  //   // or can remove these trivial resolvers as I've done by commenting out here and it will still work
+  //   // the above resolvers still happen under the hood but don't need to type them
+  // }
 }
 
 // GraphQLServer allows us to reference for typeDefs, as below, instead of forcing us to have string variable in the same file
