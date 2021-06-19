@@ -21,6 +21,17 @@ const resolvers = {
     info: () => `This is the API of a Hackerclone News`,
     feed: () => links
   },
+  Mutation: {
+    post: (parent, args) => {
+      const link = {
+        id: `link-${idCount++}`,
+        description: args.description,
+        url: args.url
+      }
+      links.push(link)
+      return link
+    }
+  },
   Link: {
     id: (parent) => parent.id,
     description: (parent) => parent.description,
@@ -28,6 +39,7 @@ const resolvers = {
   }
 }
 
+// GraphQLServer allows us to reference for typeDefs, as below, instead of forcing us to have string variable in the same file
 const server = new ApolloServer({
   typeDefs: fs.readFileSync(
     path.join(__dirname, 'schema.graphql'),
