@@ -40,8 +40,8 @@ const resolvers = {
     }
   },
   Mutation: {
-    post: (parent, args, context) => {
-      const newLink = context.prisma.link.create({
+    post: async (parent, args, context) => {
+      const newLink = await context.prisma.link.create({
         data: {
           description: args.description,
           url: args.url
@@ -49,40 +49,43 @@ const resolvers = {
       })
       return newLink;
     },
-    // updateLink: (parent, args) => {
-    //   // find the desired link based on id passed in args
-    //   const selectedLink = links.find( (link) => link.id == args.id );
+    updateLink: async (parent, args, { prisma }) => {
+      // updated data object
+      let updatedData;
 
-    //   // make desired changes to the link
-    //   if(args.url) {
-    //     selectedLink.url = args.url;
-    //   }
-    //   if(args.description) {
-    //     selectedLink.description = args.description;
-    //   }
+      if(args.url && args.description) {
+        updatedData = {
+          url: args.url,
+          description: args.description
+        }
+      } else if(args.url) {
+        updatedData = {
+          url: args.url
+        }
+      } else if(args.description) {
+        updatedData = {
+          description: args.description
+        }
+      }
 
-    //   //return the updated link
-    //   return selectedLink;
-    // },
-    // deleteLink: (parent, { id }) => {
-    //   // find index of desired link based on id passed in args, abstracted to { id } here
-    //   const selectedLinkIndex = links.findIndex( (link) => link.id === id );
+      // find the desired link based on id passed in args
+      const updateLink = prisma.link.update({
+        where: {
+          id: parseInt(args.id)
+        },
+        data: updatedData
+      });
 
-    //   const startLength = links.length;
-
-    //   // delete link at above index from links list.
-    //   let removedLink = links[selectedLinkIndex]
-    //   links.splice(selectedLinkIndex, 1);
-
-    //   // return deleted Link
-    //   if(links.length + 1 === startLength) {
-    //     // return `Successfully deleted ${ id }`;
-    //     return removedLink;
-    //   } else {
-    //     return 'Failed to remove link'
-    //   }
-    // }
-  },
+      //return the updated link
+      return updateLink;
+    },
+    deleteLink: async (parent, { id }) => {
+      const deleteLink = await prisma.link.delete({
+        where: {
+          id: parseInt(id)
+        }
+      })
+    },
   // The entire Link resolver can be commented out since the only implementations we're using are trivial here
   // Link: {
   //   // id: (parent) => parent.id,
@@ -91,6 +94,7 @@ const resolvers = {
   //   // or can remove these trivial resolvers as I've done by commenting out here and it will still work
   //   // the above resolvers still happen under the hood but don't need to type them
   // }
+  }
 }
 
 // GraphQLServer allows us to reference external files with 'fs' for typeDefs, as below, instead of forcing us to have string variable in the same file
