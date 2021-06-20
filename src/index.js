@@ -5,22 +5,6 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-// dummy data
-let links = [
-  {
-    id: 'link-0',
-    url: 'www.howtographql.com',
-    description: 'Fullstack tutorial for GraphQL'
-  },
-  {
-    id: 'link-1',
-    url: 'www.howtographql.com/graphql-js',
-    description: 'A deeper dive specifically for GraphQL in JavaScript'
-  }
-]
-
-// let idCount = links.length
-
 const resolvers = {
   Query: {
     info: () => `This is the API of a Hackerclone News`,
