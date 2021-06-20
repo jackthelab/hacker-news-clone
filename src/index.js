@@ -25,14 +25,19 @@ const resolvers = {
   Query: {
     info: () => `This is the API of a Hackerclone News`,
     feed: async (parent, args, { prisma }) => {
-      return prisma.link.findMany();
+      return await prisma.link.findMany();
     },
-    // link: (parent, { id }, { prisma }) => {
-    //   // return links.find( (link) => link.id === id )
-    //   return prisma.link.find( (link) => link.id === id )
-    //   // could also write context.prisma.link.findMany() if passing the entire context argument without this abstraction
-    //   // for example, see how this is done in mutation -> post
-    // }
+    link: async (parent, { id }, { prisma }) => {
+      // abstracted out prisma from context or else would have written context.prisma.link.findUnique()
+      // need to use parseInt here because prisma is looking for int but the query is sending as a string
+      const link = await prisma.link.findUnique({
+        where: {
+          id: parseInt(id)
+        }
+      })
+
+      return link;
+    }
   },
   Mutation: {
     post: (parent, args, context) => {
