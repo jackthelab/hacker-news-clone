@@ -1,6 +1,9 @@
 const { ApolloServer } = require('apollo-server');
 const fs = require('fs');
 const path = require('path');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 // dummy data
 let links = [
@@ -16,59 +19,64 @@ let links = [
   }
 ]
 
-let idCount = links.length
+// let idCount = links.length
 
 const resolvers = {
   Query: {
     info: () => `This is the API of a Hackerclone News`,
-    feed: () => links,
-    link: (parent, { id }) => {
-      return links.find( (link) => link.id === id )
-    }
+    feed: async (parent, args, { prisma }) => {
+      return prisma.link.findMany();
+    },
+    // link: (parent, { id }, { prisma }) => {
+    //   // return links.find( (link) => link.id === id )
+    //   return prisma.link.find( (link) => link.id === id )
+    //   // could also write context.prisma.link.findMany() if passing the entire context argument without this abstraction
+    //   // for example, see how this is done in mutation -> post
+    // }
   },
   Mutation: {
-    post: (parent, args) => {
-      const link = {
-        id: `link-${idCount++}`,
-        description: args.description,
-        url: args.url
-      }
-      links.push(link)
-      return link
+    post: (parent, args, context) => {
+      const newLink = context.prisma.link.create({
+        data: {
+          description: args.description,
+          url: args.url
+        }
+      })
+      return newLink;
     },
-    updateLink: (parent, args) => {
-      // find the desired link based on id passed in args
-      const selectedLink = links.find( (link) => link.id == args.id );
+    // updateLink: (parent, args) => {
+    //   // find the desired link based on id passed in args
+    //   const selectedLink = links.find( (link) => link.id == args.id );
 
-      // make desired changes to the link
-      if(args.url) {
-        selectedLink.url = args.url;
-      }
-      if(args.description) {
-        selectedLink.description = args.description;
-      }
+    //   // make desired changes to the link
+    //   if(args.url) {
+    //     selectedLink.url = args.url;
+    //   }
+    //   if(args.description) {
+    //     selectedLink.description = args.description;
+    //   }
 
-      //return the updated link
-      return selectedLink;
-    },
-    deleteLink: (parent, { id }) => {
-      // find index of desired link based on id passed in args, abstracted to { id } here
-      const selectedLinkIndex = links.findIndex( (link) => link.id === id );
+    //   //return the updated link
+    //   return selectedLink;
+    // },
+    // deleteLink: (parent, { id }) => {
+    //   // find index of desired link based on id passed in args, abstracted to { id } here
+    //   const selectedLinkIndex = links.findIndex( (link) => link.id === id );
 
-      const startLength = links.length;
+    //   const startLength = links.length;
 
-      // delete link at above index from links list.
-      let removedLink = links[selectedLinkIndex]
-      links.splice(selectedLinkIndex, 1);
+    //   // delete link at above index from links list.
+    //   let removedLink = links[selectedLinkIndex]
+    //   links.splice(selectedLinkIndex, 1);
 
-      // return deleted Link
-      if(links.length + 1 === startLength) {
-        // return `Successfully deleted ${ id }`;
-        return removedLink;
-      } else {
-        return 'Failed to remove link'
-      }
-    }
+    //   // return deleted Link
+    //   if(links.length + 1 === startLength) {
+    //     // return `Successfully deleted ${ id }`;
+    //     return removedLink;
+    //   } else {
+    //     return 'Failed to remove link'
+    //   }
+    // }
   },
   // The entire Link resolver can be commented out since the only implementations we're using are trivial here
   // Link: {
@@ -86,7 +94,10 @@ const server = new ApolloServer({
     path.join(__dirname, 'schema.graphql'),
     'utf-8'
   ),
-  resolvers
+  resolvers,
+  context: {
+    prisma
+  }
 })
 
 server
