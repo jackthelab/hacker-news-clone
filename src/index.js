@@ -10,6 +10,7 @@ const Mutation = require('./resolvers/Mutation');
 const Link = require('./resolvers/Link');
 const User = require('./resolvers/User');
 const Subscription = require('./resolvers/Subscription');
+const Vote = require('./resolvers/Vote');
 
 const prisma = new PrismaClient();
 const pubsub = new PubSub();
@@ -19,7 +20,8 @@ const resolvers = {
   Mutation,
   Subscription,
   Link,
-  User
+  User,
+  Vote
 }
 
 // GraphQLServer allows us to reference external files with 'fs' for typeDefs, as below, instead of forcing us to have string variable in the same file
